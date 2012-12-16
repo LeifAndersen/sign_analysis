@@ -9,9 +9,10 @@ object Expresion {
     }
     case List(_, rest: List[Any]) => preprocess(rest)
     case List() => null
+    case _ => "error"
   }
 
-  def alpha(n: Integer): Set[String] = {
+  def alpha(n: Int): Set[String] = {
     if(n < 0) {
       Set("-")
     } else if(n > 0) {
@@ -21,7 +22,7 @@ object Expresion {
     }
   }
 
-  def plusAbstract(s1: List[String], s2: List[String]): Set[String] = {
+  def plusAbstract(s1: Set[String], s2: Set[String]): Set[String] = {
     var x = Set[String]()
     for(i <- s1) {
       for(j <- s2) {
@@ -51,7 +52,7 @@ object Expresion {
     }
   }
 
-  def multiplyAbstract(s1: List[String], s2: List[String]): Set[String] = {
+  def multiplyAbstract(s1: Set[String], s2: Set[String]): Set[String] = {
     var x = Set[String]()
     for(i <- s1) {
       for(j <- s2) {
@@ -82,7 +83,12 @@ object Expresion {
   }
 
   def ExpAEval(exp:Any, aenv:scala.collection.mutable.HashMap[String, Set[String]]): Set[String] = exp match {
-    case _ => null
+    case a: Int => alpha(a)
+    case a: String => aenv(a)
+    case List("+", a, b) => plusAbstract(ExpAEval(a, aenv), ExpAEval(b, aenv))
+    case List("*", a, b) => multiplyAbstract(ExpAEval(a, aenv), ExpAEval(b, aenv))
+    case List("=", a, b) => Set("0", "+")
+    case _ => Set("error")
   }
 
   def main(args: Array[String]) {
