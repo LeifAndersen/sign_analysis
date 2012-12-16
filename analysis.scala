@@ -8,7 +8,7 @@ object Expresion {
       preprocess(rest)
     }
     case List(_, rest: List[Any]) => preprocess(rest)
-    case _ => null
+    case List() => null
   }
 
   def alpha(n: Integer): Set[String] = {
@@ -81,9 +81,13 @@ object Expresion {
     }
   }
 
+  def ExpAEval(exp:Any, aenv:scala.collection.mutable.HashMap[String, Set[String]]): Set[String] = exp match {
+    case _ => null
+  }
+
   def main(args: Array[String]) {
     var code = List()
-    preprocess(List(List("label", "lab"), List("3")))
+    preprocess(List(List("label", "lab"), List(List("label", "lab2"), List(List("goto", "got"), List()))))
     println(StatementMap)
   }
 }
