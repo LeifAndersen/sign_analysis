@@ -1,9 +1,8 @@
-case class AState(statement: List[Any], env: scala.collection.mutable.HashMap[String, Set[String]]) {
-}
+case class AState(statement: List[Any], env: Map[String, Set[String]])
 
 object Expresion {
 
-  val StatementMap = scala.collection.mutable.HashMap.empty[String,List[Any]];
+  var StatementMap = Map.empty[String,List[Any]];
 
   def preprocess(code: List[Any]): Any = code match {
     case List(List("label", label: String), rest: List[Any]) => {
@@ -85,7 +84,7 @@ object Expresion {
     }
   }
 
-  def ExpAEval(exp:Any, aenv:scala.collection.mutable.HashMap[String, Set[String]]): Set[String] = exp match {
+  def ExpAEval(exp: Any, aenv: Map[String, Set[String]]): Set[String] = exp match {
     case a: Int => alpha(a)
     case a: String => aenv(a)
     case List("+", a, b) => plusAbstract(ExpAEval(a, aenv), ExpAEval(b, aenv))
@@ -94,8 +93,18 @@ object Expresion {
     case _ => Set("error")
   }
 
-  def astep(astate0: AState): AState = astate0 statement match {
-    case _ => AState(List("error"), astate0 env)
+  def astep(astate0: AState): Any = astate0 statement match {
+    case List() => astate0 env
+    case List(List("label", lab: String), rest: List[Any]) => List(AState(rest, astate0 env))
+    case List(List(":=", va: String, exp: Any), rest: List[Any]) => {
+      val aenv2 = astate0.env++Map(va -> ExpAEval(exp, astate0 env))
+      List(AState(rest, aenv2))
+    }
+    case List(List("goto", lab: String), rest: List[Any]) => List(AState(StatementMap(lab), astate0 env))
+    case List(List("if", exp: Any, "goto", lab: String), rest: List[Any]) => List(
+      AState(StatementMap(lab), astate0 env),
+      AState(rest, astate0 env))
+    case _ => "error"
   }
 
   def main(args: Array[String]) {
