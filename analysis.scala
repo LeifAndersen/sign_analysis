@@ -1,3 +1,6 @@
+case class AState(statement: List[Any], env: scala.collection.mutable.HashMap[String, Set[String]]) {
+}
+
 object Expresion {
 
   val StatementMap = scala.collection.mutable.HashMap.empty[String,List[Any]];
@@ -89,6 +92,10 @@ object Expresion {
     case List("*", a, b) => multiplyAbstract(ExpAEval(a, aenv), ExpAEval(b, aenv))
     case List("=", a, b) => Set("0", "+")
     case _ => Set("error")
+  }
+
+  def astep(astate0: AState): AState = astate0 statement match {
+    case _ => AState(List("error"), astate0 env)
   }
 
   def main(args: Array[String]) {
