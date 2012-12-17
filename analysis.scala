@@ -3,6 +3,8 @@ case class AState(statement: List[Any], env: Map[String, Set[String]])
 object Expresion {
 
   var StatementMap = Map.empty[String,List[Any]];
+  var code = List(List("label", "lab"), List(List("label", "lab2"), List(List("goto", "got"), List())))
+  var env = Map.empty[String, Set[String]]
 
   def preprocess(code: List[Any]): Any = code match {
     case List(List("label", label: String), rest: List[Any]) => {
@@ -93,6 +95,7 @@ object Expresion {
     case _ => Set("error")
   }
 
+  // Splitting this up due to limitation in jvm
   def astep(astate0: AState): Any = astate0 statement match {
     case List() => astate0 env
     case List(List("label", lab: String), rest: List[Any]) => List(AState(rest, astate0 env))
@@ -100,6 +103,9 @@ object Expresion {
       val aenv2 = astate0.env++Map(va -> ExpAEval(exp, astate0 env))
       List(AState(rest, aenv2))
     }
+    case _ => astep2(astate0)
+  }
+  def astep2(astate0: AState): Any = astate0 statement match {
     case List(List("goto", lab: String), rest: List[Any]) => List(AState(StatementMap(lab), astate0 env))
     case List(List("if", exp: Any, "goto", lab: String), rest: List[Any]) => List(
       AState(StatementMap(lab), astate0 env),
@@ -108,9 +114,22 @@ object Expresion {
   }
 
   def main(args: Array[String]) {
-    var code = List()
-    preprocess(List(List("label", "lab"), List(List("label", "lab2"), List(List("goto", "got"), List()))))
-    println(StatementMap)
+    preprocess(code)
+    var astate0 = AState(code, env)
+    var visited = Set.empty[AState]
+    var todo = List(astate0)
+    while(!todo.isEmpty) {
+      var curr = todo.head
+      todo = todo.tail
+      if(!visited.contains(curr)) {
+        visited += curr
+        var succ = astep(curr)
+        if(succ.isInstanceOf[List[AState]]) {
+          todo = todo ++ succ.asInstanceOf[List[AState]]
+        }
+      }
+    }
+    println(visited)
   }
 }
 
