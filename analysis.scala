@@ -1,9 +1,9 @@
 case class AState(statement: List[Any], env: Map[String, Set[String]])
 
-object Expresion {
+object analysis {
 
   var StatementMap = Map.empty[String,List[Any]];
-  var code = List(List("label", "lab"), List(List("label", "lab2"), List(List("goto", "got"), List())))
+  var code = List(List("label", "lab"), List(List("label", "lab2"), List(List("goto", "lab"), List())))
   var env = Map.empty[String, Set[String]]
 
   def preprocess(code: List[Any]): Any = code match {
@@ -130,6 +130,7 @@ object Expresion {
       }
     }
     println(visited)
+    visited
   }
 }
 
